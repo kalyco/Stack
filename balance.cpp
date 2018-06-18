@@ -2,26 +2,61 @@
 #include <cctype>
 #include <cstring>
 #include "stack.h"
+#include <unordered_map>
+#include "sll.h"
 
 using namespace std;
 
-const string& RIGHTIES = "}])";
+SLinkedList pushLeftBracesOnStack(stack * stk, string& str) {
+  char *lstr = new char[3];
+  strcpy(lstr, "{[(");
+  SLinkedList * bList = new SLinkedList();
+  for (int i=0; i < str.length(); i++) {
+   if (strchr(lstr, str[i])) {
+    stk->push(str[i]);
+    bList->addFront(str[i]);
+   }
+  }
+  delete[] lstr;
+  return *bList;
+}
+
+bool balanceCheck(stack * stk, string& str, SLinkedList bList) {
+  // Create a key-val map to check matches
+  unordered_map<char, char> mMatch;
+  mMatch.insert("}", "{");
+  mMatch.insert("]", "[");
+  mMatch.insert(")", "(");
+  char *rstr = new char[3];
+  strcpy(rstr, ")]}");
+
+  for(int i=0; i < str.length(); i++) {
+    if (strchr(rstr, str[i])) {
+      char mCheck = stk->top();
+      if (str[i] == mCheck) {
+        stk->pop();
+      }
+      else {
+        return false;
+      } 
+    }
+  }
+  delete[] rstr;
+  return true;
+}  
 
 bool isBalanced(string& s)
 {
+  bool result;
   stack * stk = new stack();
-  char *cstr = new char[3];
-  strcpy(cstr, "{[(");
 
-  for (int i=0; i < s.length(); i++) {
-   if (strchr(cstr, s[i])) {
-    stk->push(s[i]);
-   }
-   
+  SLinkedList bList = pushLeftBracesOnStack(stk, s);
+  if (!stk->isEmpty()) {
+    result = balanceCheck(stk, s, bList);
+  } else {
+    result = true;
   }
-
-  delete[] cstr;
-  return false;
+  return result;
 }
 
 int main()
