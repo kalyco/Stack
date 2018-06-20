@@ -1,62 +1,61 @@
+// char::find
 #include <iostream>
 #include <cctype>
 #include <cstring>
 #include "stack.h"
-#include <unordered_map>
-#include "sll.h"
+#include <map>
 
 using namespace std;
 
-SLinkedList pushLeftBracesOnStack(stack * stk, string& str) {
+void checkLeftBracks(stack * stk, char s) {
   char *lstr = new char[3];
-  strcpy(lstr, "{[(");
-  SLinkedList * bList = new SLinkedList();
-  for (int i=0; i < str.length(); i++) {
-   if (strchr(lstr, str[i])) {
-    stk->push(str[i]);
-    bList->addFront(str[i]);
+  strcpy(lstr, "([{");
+
+  if (strchr(lstr, s)) {
+    stk->push(s);
    }
-  }
   delete[] lstr;
-  return *bList;
 }
 
-bool balanceCheck(stack * stk, string& str, SLinkedList bList) {
-  // Create a key-val map to check matches
-  unordered_map<char, char> mMatch;
-  mMatch.insert("}", "{");
-  mMatch.insert("]", "[");
-  mMatch.insert(")", "(");
+char getLeftMatch(int i) {
+  char *lstr = new char[3];
+  strcpy(lstr, "([{");
+  
+  char l = lstr[i];
+  delete[] lstr;
+  return l;
+}
+
+bool rightBracksMatch(stack * stk, char s) {
   char *rstr = new char[3];
   strcpy(rstr, ")]}");
+  string r = rstr;
 
-  for(int i=0; i < str.length(); i++) {
-    if (strchr(rstr, str[i])) {
-      char mCheck = stk->top();
-      if (str[i] == mCheck) {
-        stk->pop();
-      }
-      else {
-        return false;
-      } 
-    }
+  if (strchr(rstr, s)) {
+    if (stk->isEmpty()) return false;
+    size_t idx = r.find(s);
+    char lVal = getLeftMatch(idx);
+    char mCheck = stk->top();
+    if (lVal == mCheck) stk->pop();  
   }
   delete[] rstr;
   return true;
-}  
+}
 
 bool isBalanced(string& s)
 {
-  bool result;
   stack * stk = new stack();
-
-  SLinkedList bList = pushLeftBracesOnStack(stk, s);
+  for (int i=0; i < s.length(); i++) {
+    checkLeftBracks(stk, s[i]);
+    if (!rightBracksMatch(stk, s[i])) {
+      return false;
+    }  
+  }  
   if (!stk->isEmpty()) {
-    result = balanceCheck(stk, s, bList);
+    return false;
   } else {
-    result = true;
+    return true;
   }
-  return result;
 }
 
 int main()
